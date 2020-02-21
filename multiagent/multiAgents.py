@@ -15,8 +15,42 @@
 from util import manhattanDistance
 from game import Directions
 import random, util
-
 from game import Agent
+
+
+################################################
+#            Evaluation Functions              #
+################################################
+
+
+def scoreEvaluationFunction(currentGameState):
+    """
+      This default evaluation function just returns the score of the state.
+      The score is the same one displayed in the Pacman GUI.
+
+      This evaluation function is meant for use with adversarial search agents
+      (not reflex agents).
+    """
+    return currentGameState.getScore()
+
+def betterEvaluationFunction(currentGameState):
+    """
+      Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
+      evaluation function (question 5).
+
+      DESCRIPTION: <write something here so we know what you did>
+    """
+    "*** YOUR CODE HERE ***"
+    util.raiseNotDefined()
+
+# Abbreviation
+better = betterEvaluationFunction
+
+
+################################################
+#                   Agents                     #
+################################################
+
 
 class ReflexAgent(Agent):
     """
@@ -75,16 +109,6 @@ class ReflexAgent(Agent):
 
         "*** YOUR CODE HERE ***"
         return successorGameState.getScore()
-
-def scoreEvaluationFunction(currentGameState):
-    """
-      This default evaluation function just returns the score of the state.
-      The score is the same one displayed in the Pacman GUI.
-
-      This evaluation function is meant for use with adversarial search agents
-      (not reflex agents).
-    """
-    return currentGameState.getScore()
 
 class MultiAgentSearchAgent(Agent):
     """
@@ -157,17 +181,3 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
         util.raiseNotDefined()
-
-def betterEvaluationFunction(currentGameState):
-    """
-      Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
-      evaluation function (question 5).
-
-      DESCRIPTION: <write something here so we know what you did>
-    """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
-
-# Abbreviation
-better = betterEvaluationFunction
-
