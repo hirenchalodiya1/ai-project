@@ -42,7 +42,7 @@ def totalCost(item, problem, heuristic):
 
 
 #######################################################
-#                 Uninformed Search                   #
+#                  Search Algoritms                   #
 #######################################################
 
 
@@ -56,7 +56,7 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
-def uninformedSearch(problem, fringe):
+def searchAlgorithm(problem, fringe):
     # get start state
     startState = problem.getStartState()
     # make visited states set as graph contains cycles
@@ -93,6 +93,12 @@ def uninformedSearch(problem, fringe):
     # raise path not found for debug purpose
     raise ValueError("path not found")
 
+
+#######################################################
+#                 Uninformed Search                   #
+#######################################################
+
+
 def depthFirstSearch(problem):
     """
     Search the deepest nodes in the search tree first.
@@ -112,7 +118,7 @@ def depthFirstSearch(problem):
     from util import Stack
     
     fringe = Stack()
-    return uninformedSearch(problem, fringe)
+    return searchAlgorithm(problem, fringe)
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
@@ -120,7 +126,7 @@ def breadthFirstSearch(problem):
     from util import Queue
 
     fringe = Queue()
-    return uninformedSearch(problem, fringe)
+    return searchAlgorithm(problem, fringe)
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
@@ -128,7 +134,13 @@ def uniformCostSearch(problem):
     from util import PriorityQueueWithFunction
     
     fringe = PriorityQueueWithFunction(backCost)
-    return uninformedSearch(problem, fringe)
+    return searchAlgorithm(problem, fringe)
+
+
+#######################################################
+#                  Informed Search                    #
+#######################################################
+
 
 def greedySearch(problem, heuristic=None):
     """Search the node that has the least heuristic cost."""
@@ -136,7 +148,7 @@ def greedySearch(problem, heuristic=None):
     from util import PriorityQueueWithFunction
     
     fringe = PriorityQueueWithFunction(lambda x: forwardCost(x, problem=problem, heuristic=heuristic))
-    return uninformedSearch(problem, fringe)
+    return searchAlgorithm(problem, fringe)
 
 def aStarSearch(problem, heuristic=None):
     """Search the node that has the lowest combined cost and heuristic first."""
@@ -144,7 +156,7 @@ def aStarSearch(problem, heuristic=None):
     from util import PriorityQueueWithFunction
     
     fringe = PriorityQueueWithFunction(lambda x: totalCost(x, problem=problem, heuristic=heuristic))
-    return uninformedSearch(problem, fringe)
+    return searchAlgorithm(problem, fringe)
 
 # Abbreviations
 bfs = breadthFirstSearch
