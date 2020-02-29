@@ -21,4 +21,5 @@ jobs:
     - name: Lint with flake8
       run: |
         source "$(pipenv --venv)"/bin/activate
+        pip freeze
         flake8 search
