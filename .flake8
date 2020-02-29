@@ -1,0 +1,6 @@
+[flake8]
+max-line-length=120
+per-file-ignores=
+    submission_autograder.py:W605,E501
+    grading.py:W605
+    autograder.py:F821
