@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -16,6 +16,7 @@
 In search.py, you will implement generic search algorithms which are called by
 Pacman agents (in searchAgents.py).
 """
+import util
 
 
 #######################################################
@@ -27,14 +28,16 @@ def backCost(item):
     """ item <state, actions, backwardCost> """
     return item[2]
 
+
 def forwardCost(item, problem, heuristic):
     """Find forward cost which is heuristic"""
-    
+
     # heuristic None means null so return Zero
-    if heuristic == None:
+    if heuristic is None:
         return 0
-    
+
     return heuristic(item[0], problem)
+
 
 def totalCost(item, problem, heuristic):
     """sum of forward cost and backward cost"""
@@ -54,7 +57,8 @@ def tinyMazeSearch(problem):
     from game import Directions
     s = Directions.SOUTH
     w = Directions.WEST
-    return  [s, s, w, s, w, w, s, w]
+    return [s, s, w, s, w, w, s, w]
+
 
 def searchAlgorithm(problem, fringe):
     # get start state
@@ -72,7 +76,7 @@ def searchAlgorithm(problem, fringe):
         # if state is visited then do not search
         if currentState in visitedStates:
             continue
-       
+
         # add state to visited state
         visitedStates.append(currentState)
 
@@ -114,27 +118,19 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     "*** YOUR CODE HERE ***"
+    return searchAlgorithm(problem, util.Stack())
 
-    from util import Stack
-    
-    fringe = Stack()
-    return searchAlgorithm(problem, fringe)
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    from util import Queue
+    return searchAlgorithm(problem, util.Queue())
 
-    fringe = Queue()
-    return searchAlgorithm(problem, fringe)
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    from util import PriorityQueueWithFunction
-    
-    fringe = PriorityQueueWithFunction(backCost)
-    return searchAlgorithm(problem, fringe)
+    return searchAlgorithm(problem, util.PriorityQueueWithFunction(backCost))
 
 
 #######################################################
@@ -145,18 +141,16 @@ def uniformCostSearch(problem):
 def greedySearch(problem, heuristic=None):
     """Search the node that has the least heuristic cost."""
     "*** YOUR CODE HERE ***"
-    from util import PriorityQueueWithFunction
-    
-    fringe = PriorityQueueWithFunction(lambda x: forwardCost(x, problem=problem, heuristic=heuristic))
-    return searchAlgorithm(problem, fringe)
+    return searchAlgorithm(problem, util.PriorityQueueWithFunction(
+        lambda x: forwardCost(x, problem=problem, heuristic=heuristic)))
+
 
 def aStarSearch(problem, heuristic=None):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    from util import PriorityQueueWithFunction
-    
-    fringe = PriorityQueueWithFunction(lambda x: totalCost(x, problem=problem, heuristic=heuristic))
-    return searchAlgorithm(problem, fringe)
+    return searchAlgorithm(problem, util.PriorityQueueWithFunction(
+        lambda x: totalCost(x, problem=problem, heuristic=heuristic)))
+
 
 # Abbreviations
 bfs = breadthFirstSearch
