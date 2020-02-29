@@ -20,5 +20,5 @@ jobs:
         pipenv install
     - name: Lint with flake8
       run: |
-        pipenv shell
+        source "$(pipenv --venv)"/bin/activate
         flake8 search
