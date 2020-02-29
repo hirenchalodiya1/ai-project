@@ -14,9 +14,6 @@
 
 # imports from python standard library
 from __future__ import print_function
-from __future__ import print_function
-from __future__ import print_function
-from __future__ import print_function
 import grading
 import imp
 import optparse
