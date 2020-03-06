@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "e76a60ec62c2d03729c6fdfeba6a73803556d4ad20e62992776141490c8082ed"
+            "sha256": "ae7527b26610943823aa47f9f4498a70488414c4d618b88be10eba93ec348606"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -15,13 +15,14 @@
             }
         ]
     },
-    "default": {
+    "default": {},
+    "develop": {
         "configparser": {
             "hashes": [
                 "sha256:254c1d9c79f60c45dfde850850883d5aaa7f19a23f13561243a050d5a7c3fe4c",
                 "sha256:c7d282687a5308319bf3d2e7706e575c635b0a470342641c93bea0ea3b5331df"
             ],
-            "markers": "python_version == '2.7'",
+            "markers": "python_version < '3.2'",
             "version": "==4.0.2"
         },
         "entrypoints": {
@@ -86,6 +87,5 @@
             "markers": "python_version < '3.5'",
             "version": "==3.7.4.1"
         }
-    },
-    "develop": {}
+    }
 }
