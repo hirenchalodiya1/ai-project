@@ -75,15 +75,55 @@ class ReflexAgent(Agent):
         # Collect legal moves and successor states
         legalMoves = gameState.getLegalActions()
 
-        # Choose one of the best actions
+        # First check ghost positions by proximate distance 2
+        danger = False
+        for ghostPos in gameState.getGhostPositions():
+          distance = manhattanDistance(gameState.getPacmanPosition(), ghostPos)
+          if distance <= 2:
+            danger = True
+            break
+
+        if not danger:
+          # If pacman can not move directly in direction then set it in setbackMoves
+          if hasattr(self, 'setbackMoves') and self.setbackMoves:
+            self.setbackMoves -= 1
+          else:
+            # Direction to closest dot
+            directions = self.closestFoodDirection(gameState)
+            for direction in directions:
+              if direction in legalMoves:
+                return direction
+            self.setbackMoves = 5
+
         scores = [self.evaluationFunction(gameState, action) for action in legalMoves]
         bestScore = max(scores)
         bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
         chosenIndex = random.choice(bestIndices) # Pick randomly among the best
 
         "Add more of your code here if you want to"
-
         return legalMoves[chosenIndex]
+
+    def closestFoodDirection(self, currentGameState):
+      pos = currentGameState.getPacmanPosition()
+      mfd = float('inf') # min food distance
+      mfp = None  # min food position
+      for foodPos in currentGameState.getFood().asList():
+        distance = manhattanDistance(pos, foodPos)
+        if distance < mfd:
+          mfd = distance
+          mfp = foodPos
+
+      dx, dy = mfp[0]-pos[0], mfp[1]-pos[1]
+      available = []
+      if dy > 0:
+          available.append(Directions.NORTH)
+      if dy < 0:
+          available.append(Directions.SOUTH)
+      if dx < 0:
+          available.append(Directions.WEST)
+      if dx > 0:
+          available.append(Directions.EAST)
+      return available
 
     def evaluationFunction(self, currentGameState, action):
         """
@@ -108,7 +148,31 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+        # TO prevent pacman from stopping
+        if action == 'Stop':
+          if successorGameState.getScore() > 0:
+            return -successorGameState.getScore()
+          else:
+            return 3*successorGameState.getScore()
+
+        # Calculate nearest food dot distance
+        foodPositions = newFood.asList()
+        mfd = float('inf') # minimum food distance
+        for food in foodPositions:
+          distance = manhattanDistance(newPos, food)
+          mfd = min(distance, mfd)
+        if mfd == float('inf'):
+          mfd = 0
+
+        # Check distance from ghost and how many ghosts are far less than 1 position
+        gd = 1 # ghost distance
+        dg = 0 # danger ghost
+        for ghost in successorGameState.getGhostPositions():
+          distance = manhattanDistance(newPos, ghost)
+          gd += distance
+          if distance <= 1:
+            dg += 1
+        return successorGameState.getScore() - mfd - 10 * dg
 
 class MultiAgentSearchAgent(Agent):
     """
