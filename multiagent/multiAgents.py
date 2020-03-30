@@ -465,4 +465,79 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
           legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # Find number of agents first
+        self.noOfAgents = gameState.getNumAgents()
+
+        # Find effective depth
+        # Because we have to expand all agents to given depth times
+        effectiveDepth = self.noOfAgents * self.depth
+
+        # Call value function and get direction from second element of return value
+        _, direction = self.value(gameState, effectiveDepth, self.index)
+
+        # Return obtain direction as best move
+        return direction
+
+    def value(self, gameState, depth, agentIndex):
+        # If we reached last step return  evaluation function value
+        if depth == 0:
+            # Return value is followed as (best value, direction for best value) tuple
+            return (self.evaluationFunction(gameState), None)
+
+        # Decide type ot agent, MIN or MAX
+        if agentIndex == 0:
+            agentType = 'MAX'
+        else:
+            agentType = 'EXP'
+
+        # Call functions accordingly
+        if agentType == 'MAX':
+            return self.maxValue(gameState, depth, agentIndex)
+
+        if agentType == 'EXP':
+            return self.expValue(gameState, depth, agentIndex)
+
+    def maxValue(self, gameState, depth, agentIndex):
+        # Find out available legal actions for agent
+        legalActions = gameState.getLegalActions(agentIndex)
+
+        # If legal action is empty then it is terminal state
+        # So, call value function as depth zero and agentIndex doesn't matter
+        if not legalActions:
+            return self.value(gameState, 0, agentIndex)
+
+        # Prepate nextAgentIndex
+        nextAgentIndex = (agentIndex + 1) % self.noOfAgents
+
+        # Get scores of successor for particular agent for particular state
+        scores = [self.value(gameState.generateSuccessor(agentIndex, action), depth-1, nextAgentIndex)[0]
+                    for action in legalActions]
+
+        # Find max score from available scores
+        maxScore = max(scores)
+
+        # Find indices for best score and return random any of them
+        bestIndices = [index for index in range(len(scores)) if scores[index] == maxScore]
+        chosenIndex = random.choice(bestIndices)
+        return (maxScore, legalActions[chosenIndex])
+
+    def expValue(self, gameState, depth, agentIndex):
+        # Find out available legal actions for agent
+        legalActions = gameState.getLegalActions(agentIndex)
+
+        # If legal action is empty then it is terminal state
+        # So, call value function as depth zero and agentIndex doesn't matter
+        if not legalActions:
+            return self.value(gameState, 0, agentIndex)
+
+        # Prepate nextAgentIndex
+        nextAgentIndex = (agentIndex + 1) % self.noOfAgents
+
+        # Get scores of successor for particular agent for particular state
+        scores = [self.value(gameState.generateSuccessor(agentIndex, action), depth-1, nextAgentIndex)[0]
+                    for action in legalActions]
+
+        # Return average score with None Direction
+        # Here if we take probability for all successor state equal then score will become average
+        averageScore = sum(scores)/float(len(legalActions))
+        return averageScore, None
