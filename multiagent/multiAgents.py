@@ -206,7 +206,7 @@ class ReflexAgent(Agent):
         if mfd == float('inf'):
           mfd = 0
 
-        # Check distance from ghost and how many ghosts are far less than 1 position
+        # Check distance from ghost and how many ghosts are far less than fear distance
         dg = 0 # number of ghost that endangers
         for ghost in successorGameState.getGhostPositions():
           distance = manhattanDistance(newPos, ghost)
