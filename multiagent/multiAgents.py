@@ -42,7 +42,32 @@ def betterEvaluationFunction(currentGameState):
       DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # Define static variable
+    FEARDISTANCE = 2
+    CAPSULEDISTANCE = 2
+
+    # Find pacman position in gamestate
+    pos = currentGameState.getPacmanPosition()
+
+    # Find min food distance for pacman
+    food = currentGameState.getFood()
+    mfd = float('inf') # minimum food distance
+    for food in food.asList():
+        distance = manhattanDistance(pos, food)
+        mfd = min(distance, mfd)
+    if mfd == float('inf'):
+        mfd = 0
+
+    # Check distance from ghost and how many ghosts are far less than fear distance
+    dg = 0 # number of ghost that endangers
+    for ghost in currentGameState.getGhostPositions():
+        distance = manhattanDistance(pos, ghost)
+        if distance <= FEARDISTANCE:
+            dg += 1
+
+    # Find out number of big dot in range of 2 distance
+    noOfCapsules = len(currentGameState.getCapsules())
+    return currentGameState.getScore() - mfd - 10 * dg - 10 * noOfCapsules
 
 # Abbreviation
 better = betterEvaluationFunction
