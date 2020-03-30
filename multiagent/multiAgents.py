@@ -260,7 +260,98 @@ class MinimaxAgent(MultiAgentSearchAgent):
             Returns the total number of agents in the game
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # Find number of agents first
+        self.noOfAgents = gameState.getNumAgents()
+
+        # Find effective depth
+        # Because we have to expand all agents to given depth times
+        effectiveDepth = self.noOfAgents * self.depth
+
+        # Call value function and get direction from second element of return value
+        _, direction = self.value(gameState, effectiveDepth, self.index)
+
+        # Return obtain direction as best move
+        return direction
+
+    def value(self, gameState, depth, agentIndex):
+        """
+        Find value of node
+        Params:
+        @gameState: gameState
+        @depth: which depth level are we
+        @agentIndex: agentIndex
+        @action: last taken action, if None then it's first step
+
+        @ret:
+        if depth is Zero then it will return eval value of state
+        if depth is nonZero then it will return tuple (best value, for best value required direction)
+        """
+        # If we reached last step return  evaluation function value
+        if depth == 0:
+            # Return value is followed as (best value, direction for best value) tuple
+            return (self.evaluationFunction(gameState), None)
+
+        # Decide type ot agent, MIN or MAX
+        if agentIndex == 0:
+            agentType = 'MAX'
+        else:
+            agentType = 'MIN'
+
+        # Call functions accordingly
+        if agentType == 'MAX':
+            return self.maxValue(gameState, depth, agentIndex)
+
+        if agentType == 'MIN':
+            return self.minValue(gameState, depth, agentIndex)
+
+    def maxValue(self, gameState, depth, agentIndex):
+        # Find out available legal actions for agent
+        legalActions = gameState.getLegalActions(agentIndex)
+
+        # If legal action is empty then it is terminal state
+        # So, call value function as depth zero and agentIndex doesn't matter
+        if not legalActions:
+            return self.value(gameState, 0, agentIndex)
+
+        # Prepate nextAgentIndex
+        nextAgentIndex = (agentIndex + 1) % self.noOfAgents
+
+        # Get scores of successor for particular agent for particular state
+        scores = [self.value(gameState.generateSuccessor(agentIndex, action), depth-1, nextAgentIndex)[0]
+                    for action in legalActions]
+
+        # Find max score from available scores
+        maxScore = max(scores)
+
+        # Find indices for best score and return random any of them
+        bestIndices = [index for index in range(len(scores)) if scores[index] == maxScore]
+        chosenIndex = random.choice(bestIndices)
+        return (maxScore, legalActions[chosenIndex])
+
+    def minValue(self, gameState, depth, agentIndex):
+        # Find out available legal actions for agent
+        legalActions = gameState.getLegalActions(agentIndex)
+
+        # If legal action is empty then it is terminal state
+        # So, call value function as depth zero and agentIndex doesn't matter
+        if not legalActions:
+            return self.value(gameState, 0, agentIndex)
+
+        # Prepate nextAgentIndex
+        nextAgentIndex = (agentIndex + 1) % self.noOfAgents
+
+        # Get scores of successor for particular agent for particular state
+        scores = [self.value(gameState.generateSuccessor(agentIndex, action), depth-1, nextAgentIndex)[0]
+                    for action in legalActions]
+
+        # Find min score from available scores
+        minScore = min(scores)
+
+        # Find indices for best score and return random any of them
+        bestIndices = [index for index in range(len(scores)) if scores[index] == minScore]
+        chosenIndex = random.choice(bestIndices)
+        return (minScore, legalActions[chosenIndex])
+
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
