@@ -283,8 +283,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
         @action: last taken action, if None then it's first step
 
         @ret:
-        if depth is Zero then it will return eval value of state
-        if depth is nonZero then it will return tuple (best value, for best value required direction)
+        Return tuple (best value, for best value required direction)
         """
         # If we reached last step return  evaluation function value
         if depth == 0:
@@ -351,7 +350,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
         bestIndices = [index for index in range(len(scores)) if scores[index] == minScore]
         chosenIndex = random.choice(bestIndices)
         return (minScore, legalActions[chosenIndex])
-
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
