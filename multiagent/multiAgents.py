@@ -16,6 +16,7 @@ from util import manhattanDistance
 from game import Directions
 import random, util
 from game import Agent
+from copy import deepcopy
 
 
 ################################################
@@ -61,7 +62,73 @@ class ReflexAgent(Agent):
       it in any way you see fit, so long as you don't touch our method
       headers.
     """
+    """
+    Pacman Agent States:
+    Safe: Any ghost are not near and it is also staring state
+    Fear: One or more ghost are near pacman
+    """
+    SAFESTATE = 1
+    FEARSTATE = 2
+    FEARDISTANCE = 2
 
+
+    def closestFoodPosition(self, gameState):
+      """
+      Find closest food position according to current game state
+      """
+      currentPosition = gameState.getPacmanPosition()
+      mfd = float('inf') # min food distance
+      mfp = None  # min food position
+      for foodPos in gameState.getFood().asList():
+        distance = manhattanDistance(currentPosition, foodPos)
+        if distance < mfd:
+          mfd = distance
+          mfp = foodPos
+      return mfp
+
+    def findPathToClosestFood(self, gameState):
+      """
+      Find path to closest food
+      """
+      # Find closest food
+      foodPos = self.closestFoodPosition(gameState)
+      # Make queue as fringe for BFS
+      fringe = util.Queue()
+      # Make current state as start state for problem
+      startState = gameState
+      # VisiteStates list for graph search
+      visitedStates = []
+      # Initialize fringe with statr state and empty actions as queue
+      fringe.push((startState, util.Queue()))
+
+      while not fringe.isEmpty():
+        currentState, actions = fringe.pop()
+
+        # If pacmanPosition of current state is visited then do not search
+        if currentState.getPacmanPosition() in visitedStates:
+          continue
+
+        # Add state to visited search
+        visitedStates.append(currentState.getPacmanPosition())
+
+        # If state if goal state then return actions
+        if currentState.getPacmanPosition() == foodPos:
+          return actions
+
+        # TODO: We can avoid calculation of getting foodPos by checking if there
+        # is food at there perticular postion, below code should work but somehow
+        # it isn't working
+        # if currentState.getPacmanPosition() in currentState.getFood().asList():
+          # return actions
+
+        # check for all neighbours
+        legalMoves = currentState.getLegalActions()
+        # legalMoves.remove(Directions.STOP)
+        for move in legalMoves:
+          newState = currentState.generatePacmanSuccessor(move)
+          newActions = deepcopy(actions)
+          newActions.push(move)
+          fringe.push((newState, newActions))
 
     def getAction(self, gameState):
         """
@@ -75,55 +142,37 @@ class ReflexAgent(Agent):
         # Collect legal moves and successor states
         legalMoves = gameState.getLegalActions()
 
+        # Define state of pacman as safe initially
+        self.pacmanState = self.SAFESTATE
+
         # First check ghost positions by proximate distance 2
-        danger = False
         for ghostPos in gameState.getGhostPositions():
           distance = manhattanDistance(gameState.getPacmanPosition(), ghostPos)
-          if distance <= 2:
-            danger = True
+          # If found then make ghost state to fear
+          if distance <= self.FEARDISTANCE:
+            self.pacmanState = self.FEARSTATE
             break
 
-        if not danger:
-          # If pacman can not move directly in direction then set it in setbackMoves
-          if hasattr(self, 'setbackMoves') and self.setbackMoves:
-            self.setbackMoves -= 1
-          else:
-            # Direction to closest dot
-            directions = self.closestFoodDirection(gameState)
-            for direction in directions:
-              if direction in legalMoves:
-                return direction
-            self.setbackMoves = 5
+        # If ghost is safe then just follow path to closest food
+        if self.pacmanState == self.SAFESTATE:
+          # If path is already calculated then do not calculate agin just use it :)
+          if hasattr(self, 'actionQueue') and not self.actionQueue.isEmpty():
+            return self.actionQueue.pop()
+          self.actionQueue = self.findPathToClosestFood(gameState)
+          return self.actionQueue.pop()
 
-        scores = [self.evaluationFunction(gameState, action) for action in legalMoves]
-        bestScore = max(scores)
-        bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
-        chosenIndex = random.choice(bestIndices) # Pick randomly among the best
+        if self.pacmanState == self.FEARSTATE:
+          # Forget past first
+          if hasattr(self, 'actionQueue'):
+            del self.actionQueue
 
-        "Add more of your code here if you want to"
-        return legalMoves[chosenIndex]
-
-    def closestFoodDirection(self, currentGameState):
-      pos = currentGameState.getPacmanPosition()
-      mfd = float('inf') # min food distance
-      mfp = None  # min food position
-      for foodPos in currentGameState.getFood().asList():
-        distance = manhattanDistance(pos, foodPos)
-        if distance < mfd:
-          mfd = distance
-          mfp = foodPos
-
-      dx, dy = mfp[0]-pos[0], mfp[1]-pos[1]
-      available = []
-      if dy > 0:
-          available.append(Directions.NORTH)
-      if dy < 0:
-          available.append(Directions.SOUTH)
-      if dx < 0:
-          available.append(Directions.WEST)
-      if dx > 0:
-          available.append(Directions.EAST)
-      return available
+          # Find out best possible way
+          scores = [self.evaluationFunction(gameState, action) for action in legalMoves]
+          bestScore = max(scores)
+          bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
+          chosenIndex = random.choice(bestIndices) # Pick randomly among the best
+          "Add more of your code here if you want to"
+          return legalMoves[chosenIndex]
 
     def evaluationFunction(self, currentGameState, action):
         """
@@ -148,13 +197,6 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
-        # TO prevent pacman from stopping
-        if action == 'Stop':
-          if successorGameState.getScore() > 0:
-            return -successorGameState.getScore()
-          else:
-            return 3*successorGameState.getScore()
-
         # Calculate nearest food dot distance
         foodPositions = newFood.asList()
         mfd = float('inf') # minimum food distance
@@ -165,13 +207,14 @@ class ReflexAgent(Agent):
           mfd = 0
 
         # Check distance from ghost and how many ghosts are far less than 1 position
-        gd = 1 # ghost distance
-        dg = 0 # danger ghost
+        dg = 0 # number of ghost that endangers
         for ghost in successorGameState.getGhostPositions():
           distance = manhattanDistance(newPos, ghost)
-          gd += distance
-          if distance <= 1:
+          if distance <= self.FEARDISTANCE:
             dg += 1
+
+        # Lesser the min food distance better the state
+        # Lesser the number of ghost that endangers better the state
         return successorGameState.getScore() - mfd - 10 * dg
 
 class MultiAgentSearchAgent(Agent):
